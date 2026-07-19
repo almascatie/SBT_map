@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Fasilitas Kesehatan Kab. Seram Bagian Timur Responsif</title>
+    <title>Peta Jaringan Rujukan Faskes Kab. SBT</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
+
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    
+
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -19,8 +19,7 @@
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
         }
-        
-        /* Layout Desktop */
+
         #sidebar {
             position: absolute;
             left: 0;
@@ -35,7 +34,7 @@
             z-index: 2000;
             transition: transform 0.3s ease;
         }
-        
+
         .sidebar-header {
             padding: 20px;
             background: #2c3e50;
@@ -44,7 +43,7 @@
         }
         .sidebar-header h3 {
             margin: 0;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
         }
         .sidebar-header p {
@@ -52,13 +51,13 @@
             font-size: 12px;
             opacity: 0.8;
         }
-        
+
         .faskes-list {
             overflow-y: auto;
             flex: 1;
             padding: 10px 0;
         }
-        
+
         .section-title {
             padding: 10px 20px 5px 20px;
             font-size: 11px;
@@ -75,7 +74,7 @@
         .section-title:first-child {
             margin-top: 0;
         }
-        
+
         .faskes-item {
             padding: 12px 20px;
             border-bottom: 1px solid #f1f2f6;
@@ -87,7 +86,7 @@
         .faskes-item:hover {
             background: #ecf0f1;
         }
-        
+
         .faskes-icon-dot {
             width: 10px;
             height: 10px;
@@ -96,10 +95,11 @@
             margin-right: 12px;
             flex-shrink: 0;
         }
-        
+
         .faskes-info {
             display: flex;
             flex-direction: column;
+            width: 100%;
         }
         .faskes-name {
             font-size: 13.5px;
@@ -112,7 +112,19 @@
             color: #7f8c8d;
             margin-top: 3px;
         }
-        
+        .faskes-meta {
+            font-size: 11px;
+            color: #e53e3e;
+            font-weight: 500;
+            margin-top: 5px;
+            background: #fff5f5;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #fed7d7;
+            display: inline-block;
+            width: fit-content;
+        }
+
         #map {
             position: absolute;
             left: 350px;
@@ -122,8 +134,7 @@
             height: 100%;
             transition: left 0.3s ease;
         }
-        
-        /* Floating Toggle Button for Mobile */
+
         #mobile-toggle-btn {
             display: none;
             position: fixed;
@@ -143,7 +154,22 @@
             align-items: center;
             gap: 8px;
         }
-        
+
+        /* Clear Button Map Control */
+        .clear-route-btn {
+            background: white;
+            padding: 6px 10px;
+            border: 2px solid rgba(0,0,0,0.2);
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            color: #333;
+        }
+        .clear-route-btn:hover {
+            background: #f4f4f4;
+        }
+
         /* Popup Styling */
         .popup-title {
             font-weight: bold;
@@ -156,8 +182,44 @@
             color: #555;
             line-height: 1.4;
         }
+        .popup-referral-box {
+            margin-top: 5px;
+            margin-bottom: 8px;
+            padding: 6px 8px;
+            background: #fff5f5;
+            border-left: 3px solid #e53e3e;
+            color: #c53030;
+            font-weight: 500;
+            border-radius: 0 4px 4px 0;
+        }
 
-        /* Responsive Breakpoint untuk HP/Tablet */
+        /* Map Popup Button */
+        .btn-action-popup {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background: #e53e3e;
+            color: white !important;
+            border: none;
+            padding: 6px 0;
+            margin-top: 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 11px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .btn-action-popup:hover {
+            background: #c53030;
+        }
+        .btn-action-rs {
+            background: #2b6cb0;
+        }
+        .btn-action-rs:hover {
+            background: #2b5592;
+        }
+
         @media (max-width: 768px) {
             #sidebar {
                 width: 100%;
@@ -174,8 +236,6 @@
             #mobile-toggle-btn {
                 display: flex;
             }
-            
-            /* Make leaflet controls move slightly up to avoid overlapping floating button */
             .leaflet-bottom.leaflet-left, .leaflet-bottom.leaflet-right {
                 bottom: 80px !important;
             }
@@ -191,37 +251,26 @@
     <span id="btn-text">Lihat Daftar Faskes</span>
 </button>
 
-<div id="sidebar"> 
-    <div class="sidebar-header" style="position: relative; display: flex; align-items: center; gap: 12px; padding: 15px;"> 
-        <!-- Logo Baru -->
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Lambang_Kabupaten_Seram_Bagian_Timur.png/500px-Lambang_Kabupaten_Seram_Bagian_Timur.png" 
-             alt="Logo SBT" 
-             style="height: 50px; width: auto; object-fit: contain;">
-
-        <!-- Pembungkus Teks -->
+<div id="sidebar">
+    <div class="sidebar-header" style="position: relative; display: flex; align-items: center; gap: 12px; padding: 15px;">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Lambang_Kabupaten_Seram_Bagian_Timur.png/500px-Lambang_Kabupaten_Seram_Bagian_Timur.png"
+             alt="Logo SBT" style="height: 50px; width: auto; object-fit: contain;">
         <div style="flex: 1;">
-            <h3 style="margin: 0; font-size: 16px;">Daftar Fasilitas Kesehatan</h3> 
-            <p style="margin: 0; font-size: 14px;">Kabupaten Seram Bagian Timur</p> 
+            <h3 style="margin: 0;">Jaringan Rujukan Kesehatan</h3>
+            <p style="margin: 0;">Kabupaten Seram Bagian Timur</p>
         </div>
-
-        <!-- Mobile close inside sidebar header --> 
-        <button onclick="toggleSidebar()" style="display: none; position: absolute; right: 15px; top: 22px; background: none; border: none; color: white; font-size: 20px; cursor: pointer;" class="mobile-close-btn">&times;</button> 
-    </div> 
-    <div class="faskes-list" id="list-container"> 
-        <!-- List items generated dynamically --> 
-    </div> 
+        <button onclick="toggleSidebar()" style="display: none; position: absolute; right: 15px; top: 22px; background: none; border: none; color: white; font-size: 20px; cursor: pointer;" class="mobile-close-btn">&times;</button>
+    </div>
+    <div class="faskes-list" id="list-container"></div>
 </div>
-
 
 <div id="map"></div>
 
 <script>
-    // Style check for mobile close button
     if (window.innerWidth <= 768) {
         document.querySelector('.mobile-close-btn').style.display = 'block';
     }
 
-    // Initialize map
     var map = L.map('map').setView([-3.6, 130.6], 9);
 
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -233,7 +282,6 @@
         attribution: 'Esri Satellite'
     });
 
-    // Elegant and soft color palette
     var createSoftIcon = function(color) {
         var svgHtml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28">
             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="${color}" stroke="#ffffff" stroke-width="1.5"/>
@@ -246,237 +294,39 @@
         });
     };
 
-    var iconPuskesmas = createSoftIcon('#3182ce'); 
-    var iconRS = createSoftIcon('#e53e3e');       
-    var iconUsulan = createSoftIcon('#319795');   
+    var iconPuskesmas = createSoftIcon('#3182ce');
+    var iconRS = createSoftIcon('#e53e3e');
+    var iconUsulan = createSoftIcon('#319795');
 
     var markerMap = {};
+    var currentRoutes = []; // Array penampung polylines aktif di peta
+
     var dataFaskes = [
-        {
-            id: "PUSKESMAS_AMARSEKARU",
-            name: "PUSKESMAS AMARSEKARU",
-            lat: -4.082687,
-            lng: 131.308842,
-            alamat: "Desa Amarsekaru, Kec. Pulau Gorom, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_KATALOKA",
-            name: "PUSKESMAS KATALOKA",
-            lat: -3.992708,
-            lng: 131.377901,
-            alamat: "Desa Kataloka, Kec. Pulau Gorom, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_MIRAN",
-            name: "PUSKESMAS MIRAN",
-            lat: -4.001604,
-            lng: 131.42178,
-            alamat: "Desa Miran, Kec. Gorom Timur, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_PULAU_PANJANG",
-            name: "PUSKESMAS PULAU PANJANG",
-            lat: -4.040742,
-            lng: 131.234131,
-            alamat: "Desa Wisalen, Kec. Pulau Panjang, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_DAI",
-            name: "PUSKESMAS DAI",
-            lat: -4.015265,
-            lng: 131.389708,
-            alamat: "Desa Kilalir, Kec. Pulau Gorom, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_TAMHER_TIMUR",
-            name: "PUSKESMAS TAMHER TIMUR",
-            lat: -4.503608,
-            lng: 131.678097,
-            alamat: "Desa Tamher Timur, Kec. Wakate, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_TEOR",
-            name: "PUSKESMAS TEOR",
-            lat: -4.6360963,
-            lng: 131.5773757,
-            alamat: "Desa Lapang Kampung Jawa, Kec. Teor, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_GESER",
-            name: "PUSKESMAS GESER",
-            lat: -3.884516,
-            lng: 130.897702,
-            alamat: "Desa Geser, Kec. Seram Timur, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_KILGA",
-            name: "PUSKESMAS KILGA",
-            lat: -3.890361,
-            lng: 130.912817,
-            alamat: "Desa Kilga, Kec. Kian Darat, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_AIR_KASAR",
-            name: "PUSKESMAS AIR KASAR",
-            lat: -3.541745,
-            lng: 130.838276,
-            alamat: "Desa Waras-Waras, Kec. Tutuk Tolu, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_KILMURI",
-            name: "PUSKESMAS KILMURI",
-            lat: -3.694441,
-            lng: 130.473679,
-            alamat: "Desa Kilmury, Kec. Kilmury, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_AFANG",
-            name: "PUSKESMAS AFANG",
-            lat: -3.72841,
-            lng: 130.57294,
-            alamat: "Desa Afang Defol, Kec. Kilmury, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_WERINAMA",
-            name: "PUSKESMAS WERINAMA",
-            lat: -3.457366,
-            lng: 129.997891,
-            alamat: "Desa Werinama, Kec. Werinama, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_BATUASA",
-            name: "PUSKESMAS BATUASA",
-            lat: -3.547032,
-            lng: 130.183752,
-            alamat: "Desa Batuasa, Kec. Kilmury, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-{
-            id: "PUSKESMAS_ATIAHU",
-            name: "PUSKESMAS ATIAHU",
-            lat: -3.3526271,
-            lng: 129.9552622,
-            alamat: "Desa Atiahu, Kec. Siwalalar, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_POLIN",
-            name: "PUSKESMAS POLIN",
-            lat: -3.335443,
-            lng: 129.89544,
-            alamat: "Desa Polin, Kec. Siwalalat, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_BULA",
-            name: "PUSKESMAS BULA",
-            lat: -3.105429,
-            lng: 130.496488,
-            alamat: "Desa Bula, Kec. Bula, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_BANGGOI",
-            name: "PUSKESMAS BANGGOI",
-            lat: -3.112941,
-            lng: 130.192439,
-            alamat: "Desa Waiketam Baru, Kec. Bula Barat, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_WARU",
-            name: "PUSKESMAS WARU",
-            lat: -3.401899,
-            lng: 130.663649,
-            alamat: "Desa Waru, Kec. Teluk Waru, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_NAMA",
-            name: "PUSKESMAS NAMA",
-            lat: -3.740683,
-            lng: 130.826663,
-            alamat: "Desa Nama, Kec. Kian Darat, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_JAKARTA_BARU",
-            name: "PUSKESMAS JAKARTA BARU",
-            lat: -3.0600368,
-            lng: 130.2587435,
-            alamat: "Desa Jakarta Baru, Kec. Bula Barat, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "PUSKESMAS_UKAR_SENGAN",
-            name: "PUSKESMAS UKAR SENGAN",
-            lat: -3.839459,
-            lng: 130.776512,
-            alamat: "Desa Manggis, Kec. Ukar Sengan, Kab. Seram Bagian Timur",
-            type: "puskesmas",
-            details: ""
-        },
-        {
-            id: "RSUD_BULA",
-            name: "RSUD BULA",
-            lat: -3.095312,
-            lng: 130.473747,
-            alamat: "Desa Kampung Wailola Kecil, Kec. Bula, Kab. Seram Bagian Timur",
-            type: "rsud",
-            details: ""
-        },
-        {
-            id: "RSUD_GORAN_RIUN",
-            name: "RSUD GORAN RIUN",
-            lat: -3.995278,
-            lng: 131.381944,
-            alamat: "Desa Kataloka, Kec. Pulau Gorom, Kab. Seram Bagian Timur",
-            type: "rsud",
-            details: ""
-        },
-        {
-            id: "USULAN_PUSKESMAS_GOROM_(Kec._Bula)",
-            name: "USULAN PUSKESMAS GOROM (Kec. Bula)",
-            lat: -3.073452,
-            lng: 130.467793,
-            alamat: "Desa Kampung Gorom, Kec. Bula, Kab. SBT",
-            type: "usulan",
-            details: "Luas Lahan: 3600 m², <br><b>Status:</b> Pemda Kab. SBT, <br><b>Anggaran:</b> Rp 14.000.000.000"
-        },
+        { id: "PUSKESMAS_AMARSEKARU", name: "PUSKESMAS AMARSEKARU", lat: -4.082687, lng: 131.308842, alamat: "Desa Amarsekaru, Kec. Pulau Gorom, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "20 km", waktu: "45 menit", rujukan: "RSUD GORAN RIUN", details: "" },
+        { id: "PUSKESMAS_KATALOKA", name: "PUSKESMAS KATALOKA", lat: -3.992708, lng: 131.377901, alamat: "Desa Kataloka, Kec. Pulau Gorom, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "1 km", waktu: "5 menit", rujukan: "RSUD GORAN RIUN", details: "" },
+        { id: "PUSKESMAS_MIRAN", name: "PUSKESMAS MIRAN", lat: -4.001604, lng: 131.42178, alamat: "Desa Miran, Kec. Gorom Timur, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "16 km", waktu: "32 menit", rujukan: "RSUD GORAN RIUN", details: "" },
+        { id: "PUSKESMAS_PULAU_PANJANG", name: "PUSKESMAS PULAU PANJANG", lat: -4.040742, lng: 131.234131, alamat: "Desa Wisalen, Kec. Pulau Panjang, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "30 km", waktu: "60 menit", rujukan: "RSUD GORAN RIUN", details: "" },
+        { id: "PUSKESMAS_DAI", name: "PUSKESMAS DAI", lat: -4.015265, lng: 131.389708, alamat: "Desa Kilalir, Kec. Pulau Gorom, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "2,7 km", waktu: "14 menit", rujukan: "RSUD GORAN RIUN", details: "" },
+        { id: "PUSKESMAS_TAMHER_TIMUR", name: "PUSKESMAS TAMHER TIMUR", lat: -4.503608, lng: 131.678097, alamat: "Desa Tamher Timur, Kec. Wakate, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "40 km", waktu: "120 menit", rujukan: "RSUD GORAN RIUN", details: "" },
+        { id: "PUSKESMAS_TEOR", name: "PUSKESMAS TEOR", lat: -4.7629447, lng: 131.733853, alamat: "Desa Lapang Kampung Jawa, Kec. Teor, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "120 km", waktu: "360 menit", rujukan: "RSUD GORAN RIUN", details: "" },
+        { id: "PUSKESMAS_GESER", name: "PUSKESMAS GESER", lat: -3.884516, lng: 130.897702, alamat: "Desa Geser, Kec. Seram Timur, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "130,46 km", waktu: "200 menit", rujukan: "RSUD BULA", details: "" },
+        { id: "PUSKESMAS_KILGA", name: "PUSKESMAS KILGA", lat: -3.890361, lng: 130.912817, alamat: "Desa Kilga, Kec. Kian Darat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "94 km", waktu: "119 menit", rujukan: "RSUD BULA", details: "" },
+        { id: "PUSKESMAS_AIR_KASAR", name: "PUSKESMAS AIR KASAR", lat: -3.541745, lng: 130.838276, alamat: "Desa Waras-Waras, Kec. Tutuk Tolu, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "82 km", waktu: "102 menit", rujukan: "RSUD BULA", details: "" },
+        { id: "PUSKESMAS_KILMURI", name: "PUSKESMAS KILMURI", lat: -3.694441, lng: 130.473679, alamat: "Desa Kilmury, Kec. Kilmury, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "182,72 km", waktu: "350 menit", rujukan: "RSUD BULA", details: "" },
+        { id: "PUSKESMAS_AFANG", name: "PUSKESMAS AFANG", lat: -3.72841, lng: 130.57294, alamat: "Desa Afang Defol, Kec. Kilmury, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "182,72 km", waktu: "350 menit", rujukan: "RSUD BULA", details: "" },
+        { id: "PUSKESMAS_WERINAMA", name: "PUSKESMAS WERINAMA", lat: -3.457366, lng: 129.997891, alamat: "Desa Werinama, Kec. Werinama, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "503 km", waktu: "720 menit", rujukan: "RSUD BULA", details: "" },
+        { id: "PUSKESMAS_BATUASA", name: "PUSKESMAS BATUASA", lat: -3.547032, lng: 130.183752, alamat: "Desa Batuasa, Kec. Kilmury, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "528 km", waktu: "800 menit", rujukan: "RSUD BULA", details: "" },
+        { id: "PUSKESMAS_ATIAHU", name: "PUSKESMAS ATIAHU", lat: -3.3526271, lng: 129.9552622, alamat: "Desa Atiahu, Kec. Siwalalar, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "488 km", waktu: "606 menit", rujukan: "RSUD BULA", details: "" },
+        { id: "PUSKESMAS_POLIN", name: "PUSKESMAS POLIN", lat: -3.335443, lng: 129.89544, alamat: "Desa Polin, Kec. Siwalalat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "478 km", waktu: "634 menit", rujukan: "RSUD BULA", details: "" },
+        { id: "PUSKESMAS_BULA", name: "PUSKESMAS BULA", lat: -3.105429, lng: 130.496488, alamat: "Desa Bula, Kec. Bula, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "2,9 km", waktu: "7 menit", rujukan: "RSUD BULA", details: "" },
+        { id: "PUSKESMAS_BANGGOI", name: "PUSKESMAS BANGGOI", lat: -3.112941, lng: 130.192439, alamat: "Desa Waiketam Baru, Kec. Bula Barat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "50 km", waktu: "62 menit", rujukan: "RSUD BULA", details: "" },
+        { id: "PUSKESMAS_WARU", name: "PUSKESMAS WARU", lat: -3.401899, strokeColor: "#000", lng: 130.663649, alamat: "Desa Waru, Kec. Teluk Waru, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "53,5 km", waktu: "64 menit", rujukan: "RSUD BULA", details: "" },
+        { id: "PUSKESMAS_NAMA", name: "PUSKESMAS NAMA", lat: -3.740683, lng: 130.826663, alamat: "Desa Nama, Kec. Kian Darat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "109 km", waktu: "139 menit", rujukan: "RSUD BULA", details: "" },
+        { id: "PUSKESMAS_JAKARTA_BARU", name: "PUSKESMAS JAKARTA BARU", lat: -3.060037, lng: 130.258744, alamat: "Desa Jakarta Baru, Kec. Bula Barat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "39 km", waktu: "60 menit", rujukan: "RSUD BULA", details: "" },
+        { id: "PUSKESMAS_UKAR_SENGAN", name: "PUSKESMAS UKAR SENGAN", lat: -3.839459, lng: 130.776512, alamat: "Desa Manggis, Kec. Ukar Sengan, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "128 km", waktu: "164 menit", rujukan: "RSUD BULA", details: "" },
+        { id: "RSUD_BULA", name: "RSUD BULA", lat: -3.095312, lng: 130.473747, alamat: "Desa Kampung Wailola Kecil, Kec. Bula, Kab. Seram Bagian Timur", type: "rsud", details: "Rumah Sakit Rujukan Utama Daerah" },
+        { id: "RSUD_GORAN_RIUN", name: "RSUD GORAN RIUN", lat: -3.995278, lng: 131.381944, alamat: "Desa Kataloka, Kec. Pulau Gorom, Kab. Seram Bagian Timur", type: "rsud", jarak: "90 km", waktu: "360 menit", rujukan: "RSUD BULA", details: "Rumah Sakit Rujukan Wilayah Pulau" },
+        { id: "USULAN_PUSKESMAS_GOROM_KEC_BULA", name: "USULAN PUSKESMAS GOROM (Kec. Bula)", lat: -3.073452, lng: 130.467793, alamat: "Desa Kampung Gorom, Kec. Bula, Kab. SBT", type: "usulan", details: "Luas Lahan: 3600 m², <br><b>Status:</b> Pemda Kab. SBT" }
     ];
 
     var groups = {
@@ -488,6 +338,83 @@
     var container = document.getElementById('list-container');
     var allMarkers = [];
 
+    // Custom Map Control to Clear Routes
+    var ClearRouteControl = L.Control.extend({
+        options: { position: 'topright' },
+        onAdd: function (map) {
+            var btn = L.DomUtil.create('button', 'clear-route-btn');
+            btn.innerHTML = '❌ Bersihkan Garis Jalur';
+            btn.onclick = function() { clearAllRoutes(); };
+            return btn;
+        }
+    });
+    map.addControl(new ClearRouteControl());
+
+    function clearAllRoutes() {
+        currentRoutes.forEach(function(r) { map.removeLayer(r); });
+        currentRoutes = [];
+    }
+
+    // Fungsi Menggambar Jalur dari Satu Puskesmas ke RSUD Rujukannya
+    window.drawReferralLine = function(puskemasId) {
+        clearAllRoutes();
+        var pusk = dataFaskes.find(d => d.id === puskemasId);
+        if(!pusk || !pusk.rujukan) return;
+
+        var targetRs = dataFaskes.find(d => d.name.toUpperCase() === pusk.rujukan.toUpperCase());
+        if(!targetRs) return;
+
+        var points = [
+            [pusk.lat, pusk.lng],
+            [targetRs.lat, targetRs.lng]
+        ];
+
+        var polyline = L.polyline(points, {
+            color: '#e53e3e',
+            weight: 4,
+            opacity: 0.8,
+            dashArray: '10, 10',
+            className: 'animated-line'
+        }).addTo(map);
+
+        currentRoutes.push(polyline);
+
+        // Zoom out dinamis agar kedua faskes terlihat di layar browser
+        var bounds = L.latLngBounds(points);
+        map.fitBounds(bounds, { padding: [80, 80], maxZoom: 12 });
+    };
+
+    // Fungsi Menggambar Semua Jalur Puskesmas Bawahan sebuah RSUD
+    window.drawAllRsNetwork = function(rsName) {
+        clearAllRoutes();
+        var targetRs = dataFaskes.find(d => d.name.toUpperCase() === rsName.toUpperCase());
+        if(!targetRs) return;
+
+        var pointsBound = [[targetRs.lat, targetRs.lng]];
+        var targetPuskesmas = dataFaskes.filter(d => d.rujukan && d.rujukan.toUpperCase() === rsName.toUpperCase());
+
+        targetPuskesmas.forEach(function(pusk) {
+            var points = [
+                [pusk.lat, pusk.lng],
+                [targetRs.lat, targetRs.lng]
+            ];
+            pointsBound.push([pusk.lat, pusk.lng]);
+
+            var polyline = L.polyline(points, {
+                color: '#2b6cb0',
+                weight: 3,
+                opacity: 0.7,
+                dashArray: '5, 5'
+            }).addTo(map);
+
+            currentRoutes.push(polyline);
+        });
+
+        var bounds = L.latLngBounds(pointsBound);
+        map.fitBounds(bounds, { padding: [60, 60] });
+    };
+
+    // Loop & Bangun Komponen Faskes
     Object.keys(groups).forEach(function(type) {
         var filtered = dataFaskes.filter(item => item.type === type);
         if (filtered.length > 0) {
@@ -499,10 +426,23 @@
             filtered.forEach(function(item) {
                 var popupContent = '<div class="popup-title">' + item.name + '</div>' +
                                    '<div class="popup-content"><b>Alamat:</b> ' + item.alamat + '<br>';
+
+                if (item.jarak && item.waktu && item.type === "puskesmas") {
+                    popupContent += '<div class="popup-referral-box">' +
+                                    '<b>➔ Rujukan Ke:</b> ' + item.rujukan + '<br>' +
+                                    '<b>⏱️ Jarak Tempuh:</b> ' + item.jarak + '<br>' +
+                                    '<b>⏳ Waktu Tempuh:</b> ' + item.waktu + '</div>' +
+                                    `<button class="btn-action-popup" onclick="drawReferralLine('${item.id}')">Tampilkan Jalur Rujukan 🗺️</button>`;
+                }
+
+                if (item.type === "rsud") {
+                    popupContent += `<button class="btn-action-popup btn-action-rs" onclick="drawAllRsNetwork('${item.name}')">Tampilkan Semua Puskesmas Rujukan 🌐</button>`;
+                }
+
                 if(item.details) {
                     popupContent += '<b>Info:</b> ' + item.details + '<br>';
                 }
-                popupContent += '<b>Koordinat:</b> ' + item.lat + ', ' + item.lng + '</div>';
+                popupContent += '<span style="font-size:10px; color:#aaa; display:block; margin-top:5px;"><b>Koordinat:</b> ' + item.lat + ', ' + item.lng + '</span></div>';
 
                 var marker = L.marker([item.lat, item.lng], {icon: groups[type].icon})
                               .bindPopup(popupContent)
@@ -517,11 +457,17 @@
                     moveToLocation(item.lat, item.lng, item.id);
                 };
 
+                var metaHtml = '';
+                if (item.jarak && item.waktu && item.type === "puskesmas") {
+                    metaHtml = `<div class="faskes-meta">⏱️ ${item.jarak} (${item.waktu}) ➔ ${item.rujukan}</div>`;
+                }
+
                 itemDiv.innerHTML = `
                     <div class="faskes-icon-dot" style="background: ${groups[type].color}"></div>
                     <div class="faskes-info">
                         <span class="faskes-name">${item.name}</span>
                         <span class="faskes-addr">${item.alamat}</span>
+                        ${metaHtml}
                     </div>
                 `;
                 container.appendChild(itemDiv);
@@ -543,7 +489,6 @@
     }
 
     function moveToLocation(lat, lng, id) {
-        // close sidebar on mobile after clicking
         if (window.innerWidth <= 768) {
             document.getElementById('sidebar').classList.remove('active');
             document.getElementById('btn-text').innerText = 'Lihat Daftar Faskes';
@@ -553,7 +498,7 @@
             animate: true,
             duration: 1.2
         });
-        
+
         setTimeout(function() {
             if(markerMap[id]) {
                 markerMap[id].openPopup();
