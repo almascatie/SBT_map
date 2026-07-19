@@ -191,17 +191,27 @@
     <span id="btn-text">Lihat Daftar Faskes</span>
 </button>
 
-<div id="sidebar">
-    <div class="sidebar-header" style="position: relative;">
-        <h3>Daftar Fasilitas Kesehatan</h3>
-        <p>Kabupaten Seram Bagian Timur</p>
-        <!-- Mobile close inside sidebar header -->
-        <button onclick="toggleSidebar()" style="display: none; position: absolute; right: 15px; top: 22px; background: none; border: none; color: white; font-size: 20px; cursor: pointer;" class="mobile-close-btn">&times;</button>
-    </div>
-    <div class="faskes-list" id="list-container">
-        <!-- List items generated dynamically -->
-    </div>
+<div id="sidebar"> 
+    <div class="sidebar-header" style="position: relative; display: flex; align-items: center; gap: 12px; padding: 15px;"> 
+        <!-- Logo Baru -->
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Lambang_Kabupaten_Seram_Bagian_Timur.png/500px-Lambang_Kabupaten_Seram_Bagian_Timur.png" 
+             alt="Logo SBT" 
+             style="height: 50px; width: auto; object-fit: contain;">
+
+        <!-- Pembungkus Teks -->
+        <div style="flex: 1;">
+            <h3 style="margin: 0; font-size: 16px;">Daftar Fasilitas Kesehatan</h3> 
+            <p style="margin: 0; font-size: 14px;">Kabupaten Seram Bagian Timur</p> 
+        </div>
+
+        <!-- Mobile close inside sidebar header --> 
+        <button onclick="toggleSidebar()" style="display: none; position: absolute; right: 15px; top: 22px; background: none; border: none; color: white; font-size: 20px; cursor: pointer;" class="mobile-close-btn">&times;</button> 
+    </div> 
+    <div class="faskes-list" id="list-container"> 
+        <!-- List items generated dynamically --> 
+    </div> 
 </div>
+
 
 <div id="map"></div>
 
