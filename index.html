@@ -308,7 +308,8 @@
     var iconPuskesmas = createSoftIcon('#3182ce');
     var iconRS = createSoftIcon('#e53e3e');
     var iconUsulan = createSoftIcon('#319795');
-    var iconRelokasi = createSoftIcon('#dd6b20'); // Warna Oranye Khusus Relokasi
+    var iconRelokasi = createSoftIcon('#dd6b20'); 
+    var iconLabkesmas = createSoftIcon('#008080'); // Warna hijau toska untuk Labkesmas
 
     var markerMap = {};
     var currentRoutes = [];
@@ -346,14 +347,18 @@
         // DATA BARU: MENU USULAN RELOKASI PUSKESMAS
         { id: "RELOKASI_MIRAN", name: "RELOKASI PUSKESMAS MIRAN", lat: -4.001951, lng: 131.429415, alamat: "Desa Miran, Kec. Gorom Timur. Kab. SBT", type: "relokasi", jarak: "15.5 km", waktu: "30 menit", rujukan: "RSUD GORAN RIUN", details: "Rencana Lokasi Pembangunan Baru (Relokasi)" },
         { id: "RELOKASI_AMARSEKARU", name: "RELOKASI PUSKESMAS AMARSEKARU", lat: -4.083382, lng: 131.307101, alamat: "Desa Amarsekaru, Kec. Pulau Gorom, Kab. SBT", type: "relokasi", jarak: "19.5 km", waktu: "42 menit", rujukan: "RSUD GORAN RIUN", details: "Rencana Lokasi Pembangunan Baru (Relokasi)" },
-        { id: "RELOKASI_PULAU_PANJANG", name: "RELOKASI PUSKESMAS PULAU PANJANG", lat: -4.010373, lng: 131.240119, alamat: "Desa Wisalen, Kec. Pulau Panjang, Kab. SBT", type: "relokasi", jarak: "28 km", waktu: "55 menit", rujukan: "RSUD GORAN RIUN", details: "Rencana Lokasi Pembangunan Baru (Relokasi)" }
+        { id: "RELOKASI_PULAU_PANJANG", name: "RELOKASI PUSKESMAS PULAU PANJANG", lat: -4.010373, lng: 131.240119, alamat: "Desa Wisalen, Kec. Pulau Panjang, Kab. SBT", type: "relokasi", jarak: "28 km", waktu: "55 menit", rujukan: "RSUD GORAN RIUN", details: "Rencana Lokasi Pembangunan Baru (Relokasi)" },
+
+        // DATA BARU: LABKESMAS KABUPATEN
+        { id: "LABKESMAS_SBT", name: "Pembangunan Baru Labkesmas Kabupaten", lat: -3.098125, lng: 130.472816, alamat: "Desa Kampung Wailola Kecil, Kec. Bula, Kab. SBT", type: "labkesmas", details: "Laboratorium Kesehatan Masyarakat Kabupaten" }
     ];
 
     var groups = {
         'rsud': { title: 'Rumah Sakit (RSUD)', color: '#e53e3e', icon: iconRS },
         'puskesmas': { title: 'Puskesmas Eksisting', color: '#3182ce', icon: iconPuskesmas },
         'usulan': { title: 'Usulan Faskes Baru', color: '#319795', icon: iconUsulan },
-        'relokasi': { title: 'Usulan Relokasi Puskesmas', color: '#dd6b20', icon: iconRelokasi }
+        'relokasi': { title: 'Usulan Relokasi Puskesmas', color: '#dd6b20', icon: iconRelokasi },
+        'labkesmas': { title: 'Labkesmas Kabupaten', color: '#008080', icon: iconLabkesmas } // Pendaftaran grup menu Labkesmas
     };
 
     var container = document.getElementById('list-container');
