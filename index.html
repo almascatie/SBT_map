@@ -36,14 +36,14 @@
         }
 
         .sidebar-header {
-            padding: 20px;
+            padding: 15px;
             background: #2c3e50;
             color: white;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .sidebar-header h3 {
             margin: 0;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
         }
         .sidebar-header p {
@@ -55,24 +55,49 @@
         .faskes-list {
             overflow-y: auto;
             flex: 1;
-            padding: 10px 0;
+            padding: 0;
         }
 
-        .section-title {
-            padding: 10px 20px 5px 20px;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #7f8c8d;
-            font-weight: bold;
-            background: #f5f7fa;
-            margin-top: 10px;
-            margin-bottom: 5px;
-            border-top: 1px solid #eaeded;
+        /* Accordion / Dropdown Styling */
+        .accordion-item {
             border-bottom: 1px solid #eaeded;
         }
-        .section-title:first-child {
-            margin-top: 0;
+        .section-title {
+            padding: 12px 20px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #2c3e50;
+            font-weight: bold;
+            background: #f8fafc;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        .section-title:hover {
+            background: #edf2f7;
+        }
+        .section-title::after {
+            content: '▼';
+            font-size: 10px;
+            color: #7f8c8d;
+            transition: transform 0.2s;
+        }
+        .accordion-item.active .section-title::after {
+            transform: rotate(-180deg);
+        }
+        .section-content {
+            display: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .accordion-item.active .section-content {
+            display: block;
+            max-height: none;
         }
 
         .faskes-item {
@@ -112,18 +137,6 @@
             color: #7f8c8d;
             margin-top: 3px;
         }
-        .faskes-meta {
-            font-size: 11px;
-            color: #e53e3e;
-            font-weight: 500;
-            margin-top: 5px;
-            background: #fff5f5;
-            padding: 4px 8px;
-            border-radius: 4px;
-            border: 1px solid #fed7d7;
-            display: inline-block;
-            width: fit-content;
-        }
 
         #map {
             position: absolute;
@@ -155,7 +168,6 @@
             gap: 8px;
         }
 
-        /* Clear Button Map Control */
         .clear-route-btn {
             background: white;
             padding: 6px 10px;
@@ -193,7 +205,6 @@
             border-radius: 0 4px 4px 0;
         }
 
-        /* Map Popup Button */
         .btn-action-popup {
             display: block;
             width: 100%;
@@ -297,9 +308,10 @@
     var iconPuskesmas = createSoftIcon('#3182ce');
     var iconRS = createSoftIcon('#e53e3e');
     var iconUsulan = createSoftIcon('#319795');
+    var iconRelokasi = createSoftIcon('#dd6b20'); // Warna Oranye Khusus Relokasi
 
     var markerMap = {};
-    var currentRoutes = []; // Array penampung polylines aktif di peta
+    var currentRoutes = [];
 
     var dataFaskes = [
         { id: "PUSKESMAS_AMARSEKARU", name: "PUSKESMAS AMARSEKARU", lat: -4.082687, lng: 131.308842, alamat: "Desa Amarsekaru, Kec. Pulau Gorom, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "20 km", waktu: "45 menit", rujukan: "RSUD GORAN RIUN", details: "" },
@@ -320,25 +332,33 @@
         { id: "PUSKESMAS_POLIN", name: "PUSKESMAS POLIN", lat: -3.335443, lng: 129.89544, alamat: "Desa Polin, Kec. Siwalalat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "478 km", waktu: "634 menit", rujukan: "RSUD BULA", details: "" },
         { id: "PUSKESMAS_BULA", name: "PUSKESMAS BULA", lat: -3.105429, lng: 130.496488, alamat: "Desa Bula, Kec. Bula, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "2,9 km", waktu: "7 menit", rujukan: "RSUD BULA", details: "" },
         { id: "PUSKESMAS_BANGGOI", name: "PUSKESMAS BANGGOI", lat: -3.0476103, lng: 130.1746349, alamat: "Desa Waiketam Baru, Kec. Bula Barat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "50 km", waktu: "62 menit", rujukan: "RSUD BULA", details: "" },
-        { id: "PUSKESMAS_WARU", name: "PUSKESMAS WARU", lat: -3.401899, strokeColor: "#000", lng: 130.663649, alamat: "Desa Waru, Kec. Teluk Waru, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "53,5 km", waktu: "64 menit", rujukan: "RSUD BULA", details: "" },
+        { id: "PUSKESMAS_WARU", name: "PUSKESMAS WARU", lat: -3.401899, lng: 130.663649, alamat: "Desa Waru, Kec. Teluk Waru, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "53,5 km", waktu: "64 menit", rujukan: "RSUD BULA", details: "" },
         { id: "PUSKESMAS_NAMA", name: "PUSKESMAS NAMA", lat: -3.740683, lng: 130.826663, alamat: "Desa Nama, Kec. Kian Darat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "109 km", waktu: "139 menit", rujukan: "RSUD BULA", details: "" },
         { id: "PUSKESMAS_JAKARTA_BARU", name: "PUSKESMAS JAKARTA BARU", lat: -3.060037, lng: 130.258744, alamat: "Desa Jakarta Baru, Kec. Bula Barat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "39 km", waktu: "60 menit", rujukan: "RSUD BULA", details: "" },
         { id: "PUSKESMAS_UKAR_SENGAN", name: "PUSKESMAS UKAR SENGAN", lat: -3.839459, lng: 130.776512, alamat: "Desa Manggis, Kec. Ukar Sengan, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "128 km", waktu: "164 menit", rujukan: "RSUD BULA", details: "" },
         { id: "RSUD_BULA", name: "RSUD BULA", lat: -3.095312, lng: 130.473747, alamat: "Desa Kampung Wailola Kecil, Kec. Bula, Kab. Seram Bagian Timur", type: "rsud", details: "Rumah Sakit Rujukan Utama Daerah" },
         { id: "RSUD_GORAN_RIUN", name: "RSUD GORAN RIUN", lat: -3.995278, lng: 131.381944, alamat: "Desa Kataloka, Kec. Pulau Gorom, Kab. Seram Bagian Timur", type: "rsud", jarak: "90 km", waktu: "360 menit", rujukan: "RSUD BULA", details: "Rumah Sakit Rujukan Wilayah Pulau" },
-        { id: "USULAN_PUSKESMAS_GOROM_KEC_BULA", name: "USULAN PUSKESMAS GOROM (Kec. Bula)", lat: -3.073452, lng: 130.467793, alamat: "Desa Kampung Gorom, Kec. Bula, Kab. SBT", type: "usulan", details: "Luas Lahan: 3600 m², <br><b>Status:</b> Pemda Kab. SBT" }
+        
+        // DATA BARU: MENU USULAN PUSKESMAS BARU
+        { id: "USULAN_PUSKESMAS_GOROM_KEC_BULA", name: "USULAN PUSKESMAS GOROM (Kec. Bula)", lat: -3.073452, lng: 130.467793, alamat: "Desa Kampung Gorom, Kec. Bula, Kab. SBT", type: "usulan", details: "Luas Lahan: 3600 m², <br><b>Status:</b> Pemda Kab. SBT" },
+        { id: "USULAN_TAMHER_TIMUR", name: "USULAN PUSKESMAS TAMHER TIMUR", lat: -4.405285, lng: 131.602082, alamat: "Desa Efa, Kec. Kesui Watubela Kab. SBT", type: "usulan", jarak: "35 km", waktu: "90 menit", rujukan: "RSUD GORAN RIUN", details: "Pembangunan Baru Puskesmas (Wilayah kerja Tamher Timur)" },
+
+        // DATA BARU: MENU USULAN RELOKASI PUSKESMAS
+        { id: "RELOKASI_MIRAN", name: "RELOKASI PUSKESMAS MIRAN", lat: -4.001951, lng: 131.429415, alamat: "Desa Miran, Kec. Gorom Timur. Kab. SBT", type: "relokasi", jarak: "15.5 km", waktu: "30 menit", rujukan: "RSUD GORAN RIUN", details: "Rencana Lokasi Pembangunan Baru (Relokasi)" },
+        { id: "RELOKASI_AMARSEKARU", name: "RELOKASI PUSKESMAS AMARSEKARU", lat: -4.083382, lng: 131.307101, alamat: "Desa Amarsekaru, Kec. Pulau Gorom, Kab. SBT", type: "relokasi", jarak: "19.5 km", waktu: "42 menit", rujukan: "RSUD GORAN RIUN", details: "Rencana Lokasi Pembangunan Baru (Relokasi)" },
+        { id: "RELOKASI_PULAU_PANJANG", name: "RELOKASI PUSKESMAS PULAU PANJANG", lat: -4.010373, lng: 131.240119, alamat: "Desa Wisalen, Kec. Pulau Panjang, Kab. SBT", type: "relokasi", jarak: "28 km", waktu: "55 menit", rujukan: "RSUD GORAN RIUN", details: "Rencana Lokasi Pembangunan Baru (Relokasi)" }
     ];
 
     var groups = {
-        'usulan': { title: 'Usulan Faskes Baru', color: '#319795', icon: iconUsulan },
         'rsud': { title: 'Rumah Sakit (RSUD)', color: '#e53e3e', icon: iconRS },
-        'puskesmas': { title: 'Puskesmas Eksisting', color: '#3182ce', icon: iconPuskesmas }
+        'puskesmas': { title: 'Puskesmas Eksisting', color: '#3182ce', icon: iconPuskesmas },
+        'usulan': { title: 'Usulan Faskes Baru', color: '#319795', icon: iconUsulan },
+        'relokasi': { title: 'Usulan Relokasi Puskesmas', color: '#dd6b20', icon: iconRelokasi }
     };
 
     var container = document.getElementById('list-container');
     var allMarkers = [];
 
-    // Custom Map Control to Clear Routes
     var ClearRouteControl = L.Control.extend({
         options: { position: 'topright' },
         onAdd: function (map) {
@@ -355,7 +375,6 @@
         currentRoutes = [];
     }
 
-    // Fungsi Menggambar Jalur dari Satu Puskesmas ke RSUD Rujukannya
     window.drawReferralLine = function(puskemasId) {
         clearAllRoutes();
         var pusk = dataFaskes.find(d => d.id === puskemasId);
@@ -364,27 +383,20 @@
         var targetRs = dataFaskes.find(d => d.name.toUpperCase() === pusk.rujukan.toUpperCase());
         if(!targetRs) return;
 
-        var points = [
-            [pusk.lat, pusk.lng],
-            [targetRs.lat, targetRs.lng]
-        ];
+        var points = [[pusk.lat, pusk.lng], [targetRs.lat, targetRs.lng]];
 
         var polyline = L.polyline(points, {
             color: '#e53e3e',
             weight: 4,
             opacity: 0.8,
-            dashArray: '10, 10',
-            className: 'animated-line'
+            dashArray: '10, 10'
         }).addTo(map);
 
         currentRoutes.push(polyline);
-
-        // Zoom out dinamis agar kedua faskes terlihat di layar browser
         var bounds = L.latLngBounds(points);
         map.fitBounds(bounds, { padding: [80, 80], maxZoom: 12 });
     };
 
-    // Fungsi Menggambar Semua Jalur Puskesmas Bawahan sebuah RSUD
     window.drawAllRsNetwork = function(rsName) {
         clearAllRoutes();
         var targetRs = dataFaskes.find(d => d.name.toUpperCase() === rsName.toUpperCase());
@@ -394,10 +406,7 @@
         var targetPuskesmas = dataFaskes.filter(d => d.rujukan && d.rujukan.toUpperCase() === rsName.toUpperCase());
 
         targetPuskesmas.forEach(function(pusk) {
-            var points = [
-                [pusk.lat, pusk.lng],
-                [targetRs.lat, targetRs.lng]
-            ];
+            var points = [[pusk.lat, pusk.lng], [targetRs.lat, targetRs.lng]];
             pointsBound.push([pusk.lat, pusk.lng]);
 
             var polyline = L.polyline(points, {
@@ -414,20 +423,33 @@
         map.fitBounds(bounds, { padding: [60, 60] });
     };
 
-    // Loop & Bangun Komponen Faskes
+    // Fungsi Pengatur Dropdown Menu Sidebar
+    window.toggleAccordion = function(element) {
+        var item = element.parentElement;
+        item.classList.toggle('active');
+    };
+
+    // Pembangunan Elemen Dropdown Bersarang
     Object.keys(groups).forEach(function(type) {
         var filtered = dataFaskes.filter(item => item.type === type);
         if (filtered.length > 0) {
+            var accItem = document.createElement('div');
+            accItem.className = 'accordion-item';
+
             var titleDiv = document.createElement('div');
             titleDiv.className = 'section-title';
             titleDiv.innerText = groups[type].title;
-            container.appendChild(titleDiv);
+            titleDiv.setAttribute('onclick', 'toggleAccordion(this)');
+            accItem.appendChild(titleDiv);
+
+            var contentDiv = document.createElement('div');
+            contentDiv.className = 'section-content';
 
             filtered.forEach(function(item) {
                 var popupContent = '<div class="popup-title">' + item.name + '</div>' +
                                    '<div class="popup-content"><b>Alamat:</b> ' + item.alamat + '<br>';
 
-                if (item.jarak && item.waktu && item.type === "puskesmas") {
+                if (item.jarak && item.waktu && (item.type === "puskesmas" || item.type === "usulan" || item.type === "relokasi")) {
                     popupContent += '<div class="popup-referral-box">' +
                                     '<b>➔ Rujukan Ke:</b> ' + item.rujukan + '<br>' +
                                     '<b>⏱️ Jarak Tempuh:</b> ' + item.jarak + '<br>' +
@@ -457,21 +479,18 @@
                     moveToLocation(item.lat, item.lng, item.id);
                 };
 
-                var metaHtml = '';
-                if (item.jarak && item.waktu && item.type === "puskesmas") {
-                    metaHtml = `<div class="faskes-meta">⏱️ ${item.jarak} (${item.waktu}) ➔ ${item.rujukan}</div>`;
-                }
-
                 itemDiv.innerHTML = `
                     <div class="faskes-icon-dot" style="background: ${groups[type].color}"></div>
                     <div class="faskes-info">
                         <span class="faskes-name">${item.name}</span>
                         <span class="faskes-addr">${item.alamat}</span>
-                        ${metaHtml}
                     </div>
                 `;
-                container.appendChild(itemDiv);
+                contentDiv.appendChild(itemDiv);
             });
+
+            accItem.appendChild(contentDiv);
+            container.appendChild(accItem);
         }
     });
 
