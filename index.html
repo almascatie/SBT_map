@@ -127,7 +127,7 @@
         }
         .faskes-name {
             font-size: 13.5px;
-            font-weight: 600;
+            font-weight: 500; /* Font Light / Medium */
             color: #2c3e50;
             line-height: 1.3;
         }
@@ -229,24 +229,23 @@
             background: #2b5592;
         }
 
-        /* --- STYLING BARU: Label Nama Lokasi Permanen --- */
+        /* --- STYLING LABEL PERMANEN MAPS --- */
         .leaflet-tooltip.custom-map-label {
             background-color: rgba(255, 255, 255, 0.95);
-            border: 1px solid #1a202c;
             border-radius: 4px;
-            color: #1a202c;
-            font-weight: 700;
-            font-size: 10px;
-            padding: 2px 6px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            font-weight: 500; /* Font Light/Regular */
+            font-size: 11px;
+            padding: 2px 7px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.25);
             white-space: nowrap;
         }
-        .leaflet-tooltip-right.custom-map-label::before {
-            border-right-color: #1a202c;
-        }
-        .leaflet-tooltip-left.custom-map-label::before {
-            border-left-color: #1a202c;
-        }
+
+        /* Warna Teks dan Border Spesifik Sesuai Kategori Icon */
+        .label-rsud { border: 1.5px solid #E41A1C; color: #B30000; font-weight: 600; }
+        .label-puskesmas { border: 1.5px solid #377EB8; color: #1C5280; }
+        .label-usulan { border: 1.5px solid #4DAF4A; color: #237A20; }
+        .label-relokasi { border: 1.5px solid #FF7F00; color: #B85600; }
+        .label-labkesmas { border: 1.5px solid #984EA3; color: #62236D; }
 
         @media (max-width: 768px) {
             #sidebar {
@@ -306,7 +305,6 @@
         attribution: '© OpenStreetMap'
     });
 
-    // Satelit langsung aktif secara default
     var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Esri Satellite'
     }).addTo(map);
@@ -324,11 +322,12 @@
         });
     };
 
-    var iconRS = createSoftIcon('#e53e3e', 42); 
-    var iconPuskesmas = createSoftIcon('#3182ce', 26);
-    var iconUsulan = createSoftIcon('#319795', 26);
-    var iconRelokasi = createSoftIcon('#dd6b20', 26); 
-    var iconLabkesmas = createSoftIcon('#008080', 26);
+    // WARNA BARU SESUAI USULAN
+    var iconRS = createSoftIcon('#E41A1C', 40); 
+    var iconPuskesmas = createSoftIcon('#377EB8', 26);
+    var iconUsulan = createSoftIcon('#4DAF4A', 26);
+    var iconRelokasi = createSoftIcon('#FF7F00', 26); 
+    var iconLabkesmas = createSoftIcon('#984EA3', 26);
 
     var markerMap = {};
     var currentRoutes = [];
@@ -352,49 +351,50 @@
         })
         .catch(err => console.error("Gagal memuat file rute_rujukan.geojson:", err));
 
+    // DATA FASKES - NAMA DIPERBARUI DENGAN TITLE CASE DAN DENGAN RINGKAS
     var dataFaskes = [
-        { id: "PUSKESMAS_AMARSEKARU", name: "PUSKESMAS AMARSEKARU", lat: -4.082687, lng: 131.308842, alamat: "Desa Amarsekaru, Kec. Pulau Gorom, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "20 km", waktu: "45 menit", rujukan: "RSUD GORAN RIUN", ruteName: "Jalur: Pk. Amarsekaru -> RSUD Goran Riun", details: "", labelDir: "left" },
-        { id: "PUSKESMAS_KATALOKA", name: "PUSKESMAS KATALOKA", lat: -3.987427, lng: 131.377412, alamat: "Desa Kataloka, Kec. Pulau Gorom, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "1 km", waktu: "5 menit", rujukan: "RSUD GORAN RIUN", ruteName: "Jalur: Pk. Kataloka -> RSUD Goran Riun", details: "", labelDir: "left" },
-        { id: "PUSKESMAS_MIRAN", name: "PUSKESMAS MIRAN", lat: -4.001604, lng: 131.42178, alamat: "Desa Miran, Kec. Gorom Timur, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "16 km", waktu: "32 menit", rujukan: "RSUD GORAN RIUN", ruteName: "Jalur: Pk. Miran -> RSUD Goran Riun", details: "", labelDir: "right" },
-        { id: "PUSKESMAS_PULAU_PANJANG", name: "PUSKESMAS PULAU PANJANG", lat: -4.040742, lng: 131.234131, alamat: "Desa Wisalen, Kec. Pulau Panjang, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "30 km", waktu: "60 menit", rujukan: "RSUD GORAN RIUN", ruteName: "", details: "", labelDir: "left" },
-        { id: "PUSKESMAS_DAI", name: "PUSKESMAS DAI", lat: -4.015265, lng: 131.389708, alamat: "Desa Kilalir, Kec. Pulau Gorom, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "2,7 km", waktu: "14 menit", rujukan: "RSUD GORAN RIUN", ruteName: "Jalur: Pk. Dai -> RSUD Goran Riun", details: "", labelDir: "left" },
-        { id: "PUSKESMAS_TAMHER_TIMUR", name: "PUSKESMAS TAMHER TIMUR", lat: -4.503608, lng: 131.678097, alamat: "Desa Tamher Timur, Kec. Wakate, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "40 km", waktu: "120 menit", rujukan: "RSUD GORAN RIUN", ruteName: "Jalur: Pk. Tamher Timur -> RSUD Goran Riun", details: "", labelDir: "right" },
-        { id: "PUSKESMAS_TEOR", name: "PUSKESMAS TEOR", lat: -4.728591, lng: 131.756918, alamat: "Desa Lapang Kampung Jawa, Kec. Teor, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "120 km", waktu: "360 menit", rujukan: "RSUD GORAN RIUN", ruteName: "Jalur: Pk. Teor -> RSUD Goran Riun", details: "", labelDir: "right" },
-        { id: "PUSKESMAS_GESER", name: "PUSKESMAS GESER", lat: -3.884516, lng: 130.897702, alamat: "Desa Geser, Kec. Seram Timur, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "130,46 km", waktu: "200 menit", rujukan: "RSUD BULA", ruteName: "Jalur: Pk. Geser -> RSUD Bula", details: "", labelDir: "left" },
-        { id: "PUSKESMAS_KILGA", name: "PUSKESMAS KILGA", lat: -3.890361, lng: 130.912817, alamat: "Desa Kilga, Kec. Kian Darat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "94 km", waktu: "119 menit", rujukan: "RSUD BULA", ruteName: "Jalur: Pk. Kilga -> RSUD Bula", details: "", labelDir: "right" },
-        { id: "PUSKESMAS_AIR_KASAR", name: "PUSKESMAS AIR KASAR", lat: -3.541745, lng: 130.838276, alamat: "Desa Waras-Waras, Kec. Tutuk Tolu, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "82 km", waktu: "102 menit", rujukan: "RSUD BULA", ruteName: "Jalur: Pk. Air Kasar -> RSUD Bula", details: "", labelDir: "right" },
-        { id: "PUSKESMAS_KILMURI", name: "PUSKESMAS KILMURI", lat: -3.694441, lng: 130.473679, alamat: "Desa Kilmury, Kec. Kilmury, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "182,72 km", waktu: "350 menit", rujukan: "RSUD BULA", ruteName: "Jalur: Pk. Kilmuri -> RSUD Bula", details: "", labelDir: "right" },
-        { id: "PUSKESMAS_AFANG", name: "PUSKESMAS AFANG", lat: -3.72841, lng: 130.57294, alamat: "Desa Afang Defol, Kec. Kilmury, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "182,72 km", waktu: "350 menit", rujukan: "RSUD BULA", ruteName: "Jalur: Pk. Afang -> RSUD Bula", details: "", labelDir: "right" },
-        { id: "PUSKESMAS_WERINAMA", name: "PUSKESMAS WERINAMA", lat: -3.457366, lng: 129.997891, alamat: "Desa Werinama, Kec. Werinama, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "503 km", waktu: "720 menit", rujukan: "RSUD BULA", ruteName: "Jalur: Pk. Werinama -> RSUD Bula", details: "", labelDir: "left" },
-        { id: "PUSKESMAS_BATUASA", name: "PUSKESMAS BATUASA", lat: -3.547032, lng: 130.183752, alamat: "Desa Batuasa, Kec. Kilmury, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "528 km", waktu: "800 menit", rujukan: "RSUD BULA", ruteName: "Jalur: Pk. Batuasa -> RSUD Bula", details: "", labelDir: "left" },
-        { id: "PUSKESMAS_ATIAHU", name: "PUSKESMAS ATIAHU", lat: -3.3699882, lng: 129.9691402, alamat: "Desa Atiahu, Kec. Siwalalar, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "488 km", waktu: "606 menit", rujukan: "RSUD BULA", ruteName: "Jalur: Pk. Atiahu -> RSUD Bula", details: "", labelDir: "left" },
-        { id: "PUSKESMAS_POLIN", name: "PUSKESMAS POLIN", lat: -3.335443, lng: 129.89544, alamat: "Desa Polin, Kec. Siwalalat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "478 km", waktu: "634 menit", rujukan: "RSUD BULA", ruteName: "Jalur: Pk. Polin -> RSUD Bula", details: "", labelDir: "left" },
-        { id: "PUSKESMAS_BULA", name: "PUSKESMAS BULA", lat: -3.105429, lng: 130.496488, alamat: "Desa Bula, Kec. Bula, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "2,9 km", waktu: "7 menit", rujukan: "RSUD BULA", ruteName: "", details: "", labelDir: "right" },
-        { id: "PUSKESMAS_BANGGOI", name: "PUSKESMAS BANGGOI", lat: -3.0476103, lng: 130.1746349, alamat: "Desa Waiketam Baru, Kec. Bula Barat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "50 km", waktu: "62 menit", rujukan: "RSUD BULA", ruteName: "Jalur: Pk. Banggoi -> RSUD Bula", details: "", labelDir: "left" },
-        { id: "PUSKESMAS_WARU", name: "PUSKESMAS WARU", lat: -3.401899, lng: 130.663649, alamat: "Desa Waru, Kec. Teluk Waru, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "53,5 km", waktu: "64 menit", rujukan: "RSUD BULA", ruteName: "Jalur: Pk. Waru -> RSUD Bula", details: "", labelDir: "right" },
-        { id: "PUSKESMAS_NAMA", name: "PUSKESMAS NAMA", lat: -3.740683, lng: 130.826663, alamat: "Desa Nama, Kec. Kian Darat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "109 km", waktu: "139 menit", rujukan: "RSUD BULA", ruteName: "Jalur: Pk. Nama -> RSUD Bula", details: "", labelDir: "left" },
-        { id: "PUSKESMAS_JAKARTA_BARU", name: "PUSKESMAS JAKARTA BARU", lat: -3.060037, lng: 130.258744, alamat: "Desa Jakarta Baru, Kec. Bula Barat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "39 km", waktu: "60 menit", rujukan: "RSUD BULA", ruteName: "Jalur: Pk. Jakarta Baru -> RSUD Bula", details: "", labelDir: "right" },
-        { id: "PUSKESMAS_UKAR_SENGAN", name: "PUSKESMAS UKAR SENGAN", lat: -3.839459, lng: 130.776512, alamat: "Desa Manggis, Kec. Ukar Sengan, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "128 km", waktu: "164 menit", rujukan: "RSUD BULA", ruteName: "Jalur: Pk. Ukar Sengan -> RSUD Bula", details: "", labelDir: "left" },
+        { id: "PUSKESMAS_AMARSEKARU", name: "Amarsekaru", lat: -4.082687, lng: 131.308842, alamat: "Desa Amarsekaru, Kec. Pulau Gorom, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "20 km", waktu: "45 menit", rujukan: "RSUD Goran Riun", ruteName: "Jalur: Pk. Amarsekaru -> RSUD Goran Riun", details: "", labelDir: "left" },
+        { id: "PUSKESMAS_KATALOKA", name: "Kataloka", lat: -3.987427, lng: 131.377412, alamat: "Desa Kataloka, Kec. Pulau Gorom, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "1 km", waktu: "5 menit", rujukan: "RSUD Goran Riun", ruteName: "Jalur: Pk. Kataloka -> RSUD Goran Riun", details: "", labelDir: "left" },
+        { id: "PUSKESMAS_MIRAN", name: "Miran", lat: -4.001604, lng: 131.42178, alamat: "Desa Miran, Kec. Gorom Timur, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "16 km", waktu: "32 menit", rujukan: "RSUD Goran Riun", ruteName: "Jalur: Pk. Miran -> RSUD Goran Riun", details: "", labelDir: "right" },
+        { id: "PUSKESMAS_PULAU_PANJANG", name: "Pulau Panjang", lat: -4.040742, lng: 131.234131, alamat: "Desa Wisalen, Kec. Pulau Panjang, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "30 km", waktu: "60 menit", rujukan: "RSUD Goran Riun", ruteName: "", details: "", labelDir: "left" },
+        { id: "PUSKESMAS_DAI", name: "Dai", lat: -4.015265, lng: 131.389708, alamat: "Desa Kilalir, Kec. Pulau Gorom, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "2,7 km", waktu: "14 menit", rujukan: "RSUD Goran Riun", ruteName: "Jalur: Pk. Dai -> RSUD Goran Riun", details: "", labelDir: "left" },
+        { id: "PUSKESMAS_TAMHER_TIMUR", name: "Tamher Timur", lat: -4.503608, lng: 131.678097, alamat: "Desa Tamher Timur, Kec. Wakate, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "40 km", waktu: "120 menit", rujukan: "RSUD Goran Riun", ruteName: "Jalur: Pk. Tamher Timur -> RSUD Goran Riun", details: "", labelDir: "right" },
+        { id: "PUSKESMAS_TEOR", name: "Teor", lat: -4.728591, lng: 131.756918, alamat: "Desa Lapang Kampung Jawa, Kec. Teor, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "120 km", waktu: "360 menit", rujukan: "RSUD Goran Riun", ruteName: "Jalur: Pk. Teor -> RSUD Goran Riun", details: "", labelDir: "right" },
+        { id: "PUSKESMAS_GESER", name: "Geser", lat: -3.884516, lng: 130.897702, alamat: "Desa Geser, Kec. Seram Timur, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "130,46 km", waktu: "200 menit", rujukan: "RSUD Bula", ruteName: "Jalur: Pk. Geser -> RSUD Bula", details: "", labelDir: "left" },
+        { id: "PUSKESMAS_KILGA", name: "Kilga", lat: -3.890361, lng: 130.912817, alamat: "Desa Kilga, Kec. Kian Darat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "94 km", waktu: "119 menit", rujukan: "RSUD Bula", ruteName: "Jalur: Pk. Kilga -> RSUD Bula", details: "", labelDir: "right" },
+        { id: "PUSKESMAS_AIR_KASAR", name: "Air Kasar", lat: -3.541745, lng: 130.838276, alamat: "Desa Waras-Waras, Kec. Tutuk Tolu, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "82 km", waktu: "102 menit", rujukan: "RSUD Bula", ruteName: "Jalur: Pk. Air Kasar -> RSUD Bula", details: "", labelDir: "right" },
+        { id: "PUSKESMAS_KILMURI", name: "Kilmuri", lat: -3.694441, lng: 130.473679, alamat: "Desa Kilmury, Kec. Kilmury, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "182,72 km", waktu: "350 menit", rujukan: "RSUD Bula", ruteName: "Jalur: Pk. Kilmuri -> RSUD Bula", details: "", labelDir: "right" },
+        { id: "PUSKESMAS_AFANG", name: "Afang", lat: -3.72841, lng: 130.57294, alamat: "Desa Afang Defol, Kec. Kilmury, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "182,72 km", waktu: "350 menit", rujukan: "RSUD Bula", ruteName: "Jalur: Pk. Afang -> RSUD Bula", details: "", labelDir: "right" },
+        { id: "PUSKESMAS_WERINAMA", name: "Werinama", lat: -3.457366, lng: 129.997891, alamat: "Desa Werinama, Kec. Werinama, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "503 km", waktu: "720 menit", rujukan: "RSUD Bula", ruteName: "Jalur: Pk. Werinama -> RSUD Bula", details: "", labelDir: "left" },
+        { id: "PUSKESMAS_BATUASA", name: "Batuasa", lat: -3.547032, lng: 130.183752, alamat: "Desa Batuasa, Kec. Kilmury, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "528 km", waktu: "800 menit", rujukan: "RSUD Bula", ruteName: "Jalur: Pk. Batuasa -> RSUD Bula", details: "", labelDir: "left" },
+        { id: "PUSKESMAS_ATIAHU", name: "Atiahu", lat: -3.3699882, lng: 129.9691402, alamat: "Desa Atiahu, Kec. Siwalalar, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "488 km", waktu: "606 menit", rujukan: "RSUD Bula", ruteName: "Jalur: Pk. Atiahu -> RSUD Bula", details: "", labelDir: "left" },
+        { id: "PUSKESMAS_POLIN", name: "Polin", lat: -3.335443, lng: 129.89544, alamat: "Desa Polin, Kec. Siwalalat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "478 km", waktu: "634 menit", rujukan: "RSUD Bula", ruteName: "Jalur: Pk. Polin -> RSUD Bula", details: "", labelDir: "left" },
+        { id: "PUSKESMAS_BULA", name: "Bula", lat: -3.105429, lng: 130.496488, alamat: "Desa Bula, Kec. Bula, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "2,9 km", waktu: "7 menit", rujukan: "RSUD Bula", ruteName: "", details: "", labelDir: "right" },
+        { id: "PUSKESMAS_BANGGOI", name: "Banggoi", lat: -3.0476103, lng: 130.1746349, alamat: "Desa Waiketam Baru, Kec. Bula Barat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "50 km", waktu: "62 menit", rujukan: "RSUD Bula", ruteName: "Jalur: Pk. Banggoi -> RSUD Bula", details: "", labelDir: "left" },
+        { id: "PUSKESMAS_WARU", name: "Waru", lat: -3.401899, lng: 130.663649, alamat: "Desa Waru, Kec. Teluk Waru, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "53,5 km", waktu: "64 menit", rujukan: "RSUD Bula", ruteName: "Jalur: Pk. Waru -> RSUD Bula", details: "", labelDir: "right" },
+        { id: "PUSKESMAS_NAMA", name: "Nama", lat: -3.740683, lng: 130.826663, alamat: "Desa Nama, Kec. Kian Darat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "109 km", waktu: "139 menit", rujukan: "RSUD Bula", ruteName: "Jalur: Pk. Nama -> RSUD Bula", details: "", labelDir: "left" },
+        { id: "PUSKESMAS_JAKARTA_BARU", name: "Jakarta Baru", lat: -3.060037, lng: 130.258744, alamat: "Desa Jakarta Baru, Kec. Bula Barat, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "39 km", waktu: "60 menit", rujukan: "RSUD Bula", ruteName: "Jalur: Pk. Jakarta Baru -> RSUD Bula", details: "", labelDir: "right" },
+        { id: "PUSKESMAS_UKAR_SENGAN", name: "Ukar Sengan", lat: -3.839459, lng: 130.776512, alamat: "Desa Manggis, Kec. Ukar Sengan, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "128 km", waktu: "164 menit", rujukan: "RSUD Bula", ruteName: "Jalur: Pk. Ukar Sengan -> RSUD Bula", details: "", labelDir: "left" },
         
-        { id: "RSUD_BULA", name: "RSUD BULA", lat: -3.095312, lng: 130.473747, alamat: "Desa Kampung Wailola Kecil, Kec. Bula, Kab. Seram Bagian Timur", type: "rsud", ruteName: "Jalur Lurus: RSUD Bula -> RSUD Goran Riun", details: "Rumah Sakit Rujukan Utama Daerah", labelDir: "left" },
-        { id: "RSUD_GORAN_RIUN", name: "RSUD GORAN RIUN", lat: -3.995278, lng: 131.381944, alamat: "Desa Kataloka, Kec. Pulau Gorom, Kab. Seram Bagian Timur", type: "rsud", jarak: "90 km", waktu: "360 menit", rujukan: "RSUD BULA", ruteName: "", details: "Rumah Sakit Rujukan Wilayah Pulau", labelDir: "right" },
+        { id: "RSUD_BULA", name: "RSUD Bula", lat: -3.095312, lng: 130.473747, alamat: "Desa Kampung Wailola Kecil, Kec. Bula, Kab. Seram Bagian Timur", type: "rsud", ruteName: "Jalur Lurus: RSUD Bula -> RSUD Goran Riun", details: "Rumah Sakit Rujukan Utama Daerah", labelDir: "left" },
+        { id: "RSUD_GORAN_RIUN", name: "RSUD Goran Riun", lat: -3.995278, lng: 131.381944, alamat: "Desa Kataloka, Kec. Pulau Gorom, Kab. Seram Bagian Timur", type: "rsud", jarak: "90 km", waktu: "360 menit", rujukan: "RSUD Bula", ruteName: "", details: "Rumah Sakit Rujukan Wilayah Pulau", labelDir: "right" },
         
-        { id: "USULAN_PUSKESMAS_GOROM_KEC_BULA", name: "USULAN PUSKESMAS BARU DI KEC. BULA", lat: -3.073452, lng: 130.467793, alamat: "Desa Kampung Gorom, Kec. Bula, Kab. SBT", type: "usulan", details: "Luas Lahan: 3600 m², <br><b>Status:</b> Pemda Kab. SBT", labelDir: "left" },
-        { id: "USULAN_TAMHER_TIMUR", name: "USULAN PUSKESMAS BARU DI KEC. KESUI WATUBELA", lat: -4.405285, lng: 131.602082, alamat: "Desa Efa, Kec. Kesui Watubela Kab. SBT", type: "usulan", jarak: "35 km", waktu: "90 menit", rujukan: "RSUD GORAN RIUN", ruteName: "Jalur Usulan: Pk. Tamher Timur -> RSUD Goran Riun", details: "Pembangunan Baru Puskesmas (Wilayah kerja Tamher Timur)", labelDir: "left" },
+        { id: "USULAN_PUSKESMAS_GOROM_KEC_BULA", name: "Gorom Bula", lat: -3.073452, lng: 130.467793, alamat: "Desa Kampung Gorom, Kec. Bula, Kab. SBT", type: "usulan", details: "Luas Lahan: 3600 m², <br><b>Status:</b> Pemda Kab. SBT", labelDir: "left" },
+        { id: "USULAN_TAMHER_TIMUR", name: "Tamher Timur", lat: -4.405285, lng: 131.602082, alamat: "Desa Efa, Kec. Kesui Watubela Kab. SBT", type: "usulan", jarak: "35 km", waktu: "90 menit", rujukan: "RSUD Goran Riun", ruteName: "Jalur Usulan: Pk. Tamher Timur -> RSUD Goran Riun", details: "Pembangunan Baru Puskesmas (Wilayah kerja Tamher Timur)", labelDir: "left" },
 
-        { id: "RELOKASI_MIRAN", name: "RELOKASI PUSKESMAS MIRAN", lat: -4.001951, lng: 131.429415, alamat: "Desa Miran, Kec. Gorom Timur. Kab. SBT", type: "relokasi", jarak: "15.5 km", waktu: "30 menit", rujukan: "RSUD GORAN RIUN", ruteName: "Jalur Relokasi: Pk. Miran -> RSUD Goran Riun", details: "Rencana Lokasi Pembangunan Baru (Relokasi)", labelDir: "right" },
-        { id: "RELOKASI_AMARSEKARU", name: "RELOKASI PUSKESMAS AMARSEKARU", lat: -4.083382, lng: 131.307101, alamat: "Desa Amarsekaru, Kec. Pulau Gorom, Kab. SBT", type: "relokasi", jarak: "19.5 km", waktu: "42 menit", rujukan: "RSUD GORAN RIUN", ruteName: "Jalur Relokasi: Pk. Amarsekaru -> RSUD Goran Riun", details: "Rencana Lokasi Pembangunan Baru (Relokasi)", labelDir: "right" },
-        { id: "RELOKASI_PULAU_PANJANG", name: "RELOKASI PUSKESMAS PULAU PANJANG", lat: -4.010373, lng: 131.240119, alamat: "Desa Wisalen, Kec. Pulau Panjang, Kab. SBT", type: "relokasi", jarak: "28 km", waktu: "55 menit", rujukan: "RSUD GORAN Riun", ruteName: "Jalur Relokasi: Pk. Pulau Panjang -> RSUD Goran Riun", details: "Rencana Lokasi Pembangunan Baru (Relokasi)", labelDir: "right" },
+        { id: "RELOKASI_MIRAN", name: "Miran", lat: -4.001951, lng: 131.429415, alamat: "Desa Miran, Kec. Gorom Timur. Kab. SBT", type: "relokasi", jarak: "15.5 km", waktu: "30 menit", rujukan: "RSUD Goran Riun", ruteName: "Jalur Relokasi: Pk. Miran -> RSUD Goran Riun", details: "Rencana Lokasi Pembangunan Baru (Relokasi)", labelDir: "right" },
+        { id: "RELOKASI_AMARSEKARU", name: "Amarsekaru", lat: -4.083382, lng: 131.307101, alamat: "Desa Amarsekaru, Kec. Pulau Gorom, Kab. SBT", type: "relokasi", jarak: "19.5 km", waktu: "42 menit", rujukan: "RSUD Goran Riun", ruteName: "Jalur Relokasi: Pk. Amarsekaru -> RSUD Goran Riun", details: "Rencana Lokasi Pembangunan Baru (Relokasi)", labelDir: "right" },
+        { id: "RELOKASI_PULAU_PANJANG", name: "Pulau Panjang", lat: -4.010373, lng: 131.240119, alamat: "Desa Wisalen, Kec. Pulau Panjang, Kab. SBT", type: "relokasi", jarak: "28 km", waktu: "55 menit", rujukan: "RSUD Goran Riun", ruteName: "Jalur Relokasi: Pk. Pulau Panjang -> RSUD Goran Riun", details: "Rencana Lokasi Pembangunan Baru (Relokasi)", labelDir: "right" },
 
-        { id: "LABKESMAS_SBT", name: "Pembangunan Baru Labkesmas Kabupaten", lat: -3.098125, lng: 130.472816, alamat: "Desa Kampung Wailola Kecil, Kec. Bula, Kab. SBT", type: "labkesmas", details: "Laboratorium Kesehatan Masyarakat Kabupaten", labelDir: "right" }
+        { id: "LABKESMAS_SBT", name: "Labkesmas SBT", lat: -3.098125, lng: 130.472816, alamat: "Desa Kampung Wailola Kecil, Kec. Bula, Kab. SBT", type: "labkesmas", details: "Laboratorium Kesehatan Masyarakat Kabupaten", labelDir: "right" }
     ];
 
     var groups = {
-        'rsud': { title: 'Rumah Sakit (RSUD)', color: '#e53e3e', icon: iconRS },
-        'puskesmas': { title: 'Puskesmas Eksisting', color: '#3182ce', icon: iconPuskesmas },
-        'usulan': { title: 'Usulan Faskes Baru', color: '#319795', icon: iconUsulan },
-        'relokasi': { title: 'Usulan Relokasi Puskesmas', color: '#dd6b20', icon: iconRelokasi },
-        'labkesmas': { title: 'Labkesmas Kabupaten', color: '#008080', icon: iconLabkesmas }
+        'rsud': { title: 'Rumah Sakit (RSUD)', color: '#E41A1C', icon: iconRS },
+        'puskesmas': { title: 'Puskesmas Eksisting', color: '#377EB8', icon: iconPuskesmas },
+        'usulan': { title: 'Usulan Faskes Baru', color: '#4DAF4A', icon: iconUsulan },
+        'relokasi': { title: 'Usulan Relokasi Puskesmas', color: '#FF7F00', icon: iconRelokasi },
+        'labkesmas': { title: 'Labkesmas Kabupaten', color: '#984EA3', icon: iconLabkesmas }
     };
 
     var container = document.getElementById('list-container');
@@ -503,6 +503,18 @@
         item.classList.toggle('active');
     };
 
+    // Fungsi Pembantu Warna Label Peta
+    function getLabelClass(type) {
+        switch(type) {
+            case 'rsud': return 'custom-map-label label-rsud';
+            case 'puskesmas': return 'custom-map-label label-puskesmas';
+            case 'usulan': return 'custom-map-label label-usulan';
+            case 'relokasi': return 'custom-map-label label-relokasi';
+            case 'labkesmas': return 'custom-map-label label-labkesmas';
+            default: return 'custom-map-label';
+        }
+    }
+
     Object.keys(groups).forEach(function(type) {
         var filtered = dataFaskes.filter(item => item.type === type);
         if (filtered.length > 0) {
@@ -539,21 +551,16 @@
                 }
                 popupContent += '<span style="font-size:10px; color:#aaa; display:block; margin-top:5px;"><b>Koordinat:</b> ' + item.lat + ', ' + item.lng + '</span></div>';
 
-                // Format nama singkat agar label di peta ringkas & mudah dibaca
-                var shortName = item.name.replace("PUSKESMAS ", "Pk. ")
-                                         .replace("RELOKASI PUSKESMAS ", "Relokasi Pk. ")
-                                         .replace("USULAN PUSKESMAS BARU DI KEC. ", "Usulan Pk. ");
-
                 var labelDirection = item.labelDir || 'right';
                 var xOffset = (labelDirection === 'left') ? -12 : 12;
 
                 var marker = L.marker([item.lat, item.lng], {icon: groups[type].icon})
                               .bindPopup(popupContent)
-                              .bindTooltip(shortName, {
+                              .bindTooltip(item.name, {
                                   permanent: true,
                                   direction: labelDirection,
                                   offset: [xOffset, -12],
-                                  className: 'custom-map-label'
+                                  className: getLabelClass(item.type)
                               })
                               .addTo(map);
 
@@ -622,7 +629,6 @@
         map.invalidateSize();
         if(allMarkers.length > 0) {
             var group = new L.featureGroup(allMarkers);
-            // map.fitBounds(group.getBounds().pad(0.1));
         }
     }, 300);
 </script>
