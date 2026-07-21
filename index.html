@@ -229,23 +229,18 @@
             background: #2b5592;
         }
 
-        /* --- STYLING BARU: Teks Ringkas Tanpa Kotak & Tanpa Garis --- */
+        /* --- STYLING TERBARU: Teks Tipis, Bergaris Bawah, Tanpa Kotak Background --- */
         .leaflet-tooltip.clean-label {
-            background: rgba(255, 255, 255, 0.75);
+            background: transparent !important;
             border: none !important;
             box-shadow: none !important;
             color: #1a202c;
-            font-weight: 700;
-            font-size: 8.5pt;
-            padding: 1px 4px;
-            border-radius: 3px;
+            font-weight: 400; /* Font Tipis */
+            font-size: 8pt;   /* Font Kecil */
+            padding: 0;
+            text-decoration: underline; /* Garis Bawah */
             white-space: nowrap;
-            text-shadow: 0 0 2px #fff, 0 0 2px #fff; /* Agar tetap terbaca jelas di atas warna peta */
-        }
-        
-        /* Menghilangkan panah bawaan tooltip */
-        .leaflet-tooltip.clean-label::before {
-            display: none !important;
+            text-shadow: 0 0 3px #ffffff, 0 0 3px #ffffff, 0 0 3px #ffffff; /* Halo tipis putih agar mudah dibaca di atas peta */
         }
 
         @media (max-width: 768px) {
@@ -301,7 +296,7 @@
 
     var map = L.map('map').setView([-3.75, 131.05], 9);
     
-    // Peta Standar (OpenStreetMap) Diaktifkan Secara Default (.addTo(map))
+    // Peta Standar (OpenStreetMap)
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '© OpenStreetMap'
@@ -352,7 +347,6 @@
         })
         .catch(err => console.error("Gagal memuat file rute_rujukan.geojson:", err));
 
-    // Posisi label, offset, & arah diatur khusus per-titik lokasi agar tidak berdekatan/bertabrakan
     var dataFaskes = [
         { id: "PUSKESMAS_AMARSEKARU", name: "PUSKESMAS AMARSEKARU", lat: -4.082687, lng: 131.308842, alamat: "Desa Amarsekaru, Kec. Pulau Gorom, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "20 km", waktu: "45 menit", rujukan: "RSUD GORAN RIUN", ruteName: "Jalur: Pk. Amarsekaru -> RSUD Goran Riun", details: "", labelDir: "bottom", offset: [0, 8] },
         { id: "PUSKESMAS_KATALOKA", name: "PUSKESMAS KATALOKA", lat: -3.987427, lng: 131.377412, alamat: "Desa Kataloka, Kec. Pulau Gorom, Kab. Seram Bagian Timur", type: "puskesmas", jarak: "1 km", waktu: "5 menit", rujukan: "RSUD GORAN RIUN", ruteName: "Jalur: Pk. Kataloka -> RSUD Goran Riun", details: "", labelDir: "top", offset: [0, -18] },
@@ -391,32 +385,12 @@
     ];
 
     var groups = {
-    'rsud': {
-        title: 'Rumah Sakit (RSUD)',
-        color: '#E53935', // Merah terang
-        icon: iconRS
-    },
-    'puskesmas': {
-        title: 'Puskesmas Eksisting',
-        color: '#1E88E5', // Biru terang
-        icon: iconPuskesmas
-    },
-    'usulan': {
-        title: 'Usulan Faskes Baru',
-        color: '#43A047', // Hijau terang
-        icon: iconUsulan
-    },
-    'relokasi': {
-        title: 'Usulan Relokasi Puskesmas',
-        color: '#FB8C00', // Orange terang
-        icon: iconRelokasi
-    },
-    'labkesmas': {
-        title: 'Labkesmas Kabupaten',
-        color: '#8E24AA', // Ungu terang
-        icon: iconLabkesmas
-    }
-};
+        'rsud': { title: 'Rumah Sakit (RSUD)', color: '#e53e3e', icon: iconRS },
+        'puskesmas': { title: 'Puskesmas Eksisting', color: '#3182ce', icon: iconPuskesmas },
+        'usulan': { title: 'Usulan Faskes Baru', color: '#319795', icon: iconUsulan },
+        'relokasi': { title: 'Usulan Relokasi Puskesmas', color: '#dd6b20', icon: iconRelokasi },
+        'labkesmas': { title: 'Labkesmas Kabupaten', color: '#008080', icon: iconLabkesmas }
+    };
 
     var container = document.getElementById('list-container');
     var allMarkers = [];
@@ -453,11 +427,7 @@
             var dynamicColor = getColorFromString(pusk.ruteName);
 
             var geojsonLayer = L.geoJSON(targetFeature, {
-                style: {
-                    color: dynamicColor,
-                    weight: 5,
-                    opacity: 0.95
-                }
+                style: { color: dynamicColor, weight: 5, opacity: 0.95 }
             }).addTo(map);
 
             currentRoutes.push(geojsonLayer);
@@ -487,11 +457,7 @@
                 var dynamicColor = getColorFromString(pusk.ruteName);
 
                 var geojsonLayer = L.geoJSON(targetFeature, {
-                    style: {
-                        color: dynamicColor,
-                        weight: 4,
-                        opacity: 0.85
-                    }
+                    style: { color: dynamicColor, weight: 4, opacity: 0.85 }
                 }).addTo(map);
 
                 currentRoutes.push(geojsonLayer);
@@ -560,7 +526,6 @@
                 }
                 popupContent += '<span style="font-size:10px; color:#aaa; display:block; margin-top:5px;"><b>Koordinat:</b> ' + item.lat + ', ' + item.lng + '</span></div>';
 
-                // Nama ringkas agar tidak terlalu panjang
                 var shortName = item.name.replace("PUSKESMAS ", "Pk. ")
                                          .replace("RELOKASI PUSKESMAS ", "Rel. ")
                                          .replace("USULAN PUSKESMAS BARU DI KEC. ", "Usl. ")
