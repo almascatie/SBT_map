@@ -138,6 +138,70 @@
             font-weight: 400;
         }
 
+        /* --- STYLING: Panel Kontrol Bagian Bawah Sidebar --- */
+        .sidebar-footer {
+            padding: 12px 15px;
+            background: #f8fafc;
+            border-top: 2px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-group-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+
+        .map-type-selector {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-map-type {
+            flex: 1;
+            padding: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid #cbd5e1;
+            background: white;
+            color: #475569;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-map-type.active {
+            background: #2c3e50;
+            color: white;
+            border-color: #2c3e50;
+        }
+
+        .sidebar-btn {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 11.5px;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            transition: background 0.2s;
+        }
+        .sidebar-btn:hover {
+            background: #f1f5f9;
+        }
+
         #map {
             position: absolute;
             left: 350px;
@@ -166,24 +230,6 @@
             cursor: pointer;
             align-items: center;
             gap: 8px;
-        }
-
-        .custom-control-btn {
-            background: white;
-            padding: 6px 10px;
-            border: 2px solid rgba(0,0,0,0.2);
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 12px;
-            color: #333;
-            margin-bottom: 5px;
-            display: block;
-            width: 100%;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.15);
-        }
-        .custom-control-btn:hover {
-            background: #f4f4f4;
         }
 
         .popup-title {
@@ -235,7 +281,7 @@
             background: #2b5592;
         }
 
-        /* --- STYLING: Label Nama Lokasi Permanen Ringkas & Elegan --- */
+        /* Label Nama Lokasi Permanen */
         .leaflet-tooltip.custom-map-label {
             background-color: rgba(255, 255, 255, 0.95);
             border: 1.5px solid #333;
@@ -247,7 +293,6 @@
             white-space: nowrap;
         }
 
-        /* Trik CSS untuk Sembunyikan/Tampilkan Label Peta */
         .hide-map-labels .leaflet-tooltip.custom-map-label {
             display: none !important;
         }
@@ -293,7 +338,32 @@
         </div>
         <button onclick="toggleSidebar()" style="display: none; position: absolute; right: 15px; top: 22px; background: none; border: none; color: white; font-size: 20px; cursor: pointer;" class="mobile-close-btn">&times;</button>
     </div>
+    
+    <!-- DAFTAR KELOMPOK FASKES -->
     <div class="faskes-list" id="list-container"></div>
+
+    <!-- PANEL KONTROL MAP DI BOTTOM SIDEBAR -->
+    <div class="sidebar-footer">
+        <div>
+            <div class="control-group-title">Mode Peta</div>
+            <div class="map-type-selector">
+                <button id="btn-osm" class="btn-map-type active" onclick="switchMapLayer('osm')">🗺️ Standar</button>
+                <button id="btn-sat" class="btn-map-type" onclick="switchMapLayer('sat')">🛰️ Satelit</button>
+            </div>
+        </div>
+
+        <div>
+            <div class="control-group-title">Opsi Tampilan</div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <button id="toggle-label-btn" class="sidebar-btn" onclick="toggleMapLabels()">
+                    🙈 Sembunyikan Label Nama
+                </button>
+                <button class="sidebar-btn" onclick="clearAllRoutes()" style="color: #c53030; border-color: #fecaca;">
+                    ❌ Bersihkan Garis Jalur
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div id="map"></div>
@@ -303,9 +373,10 @@
         document.querySelector('.mobile-close-btn').style.display = 'block';
     }
 
-    var map = L.map('map').setView([-3.75, 131.05], 9);
-    
-    // 1. PETA STANDAR DITAMPILKAN DI AWAL (.addTo(map))
+    var map = L.map('map', { zoomControl: false }).setView([-3.75, 131.05], 9);
+    L.control.zoom({ position: 'topleft' }).addTo(map);
+
+    // Layer Peta
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '© OpenStreetMap'
@@ -314,6 +385,21 @@
     var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Esri Satellite'
     });
+
+    // Switch Mode Peta (Standar / Satelit)
+    function switchMapLayer(type) {
+        if (type === 'osm') {
+            map.removeLayer(satellite);
+            map.addLayer(osm);
+            document.getElementById('btn-osm').classList.add('active');
+            document.getElementById('btn-sat').classList.remove('active');
+        } else {
+            map.removeLayer(osm);
+            map.addLayer(satellite);
+            document.getElementById('btn-sat').classList.add('active');
+            document.getElementById('btn-osm').classList.remove('active');
+        }
+    }
 
     var createSoftIcon = function(color, size) {
         var iconSize = size || 26;
@@ -328,12 +414,11 @@
         });
     };
 
-    // Warna Icon Sesuai Kelompok
-    var iconRS = createSoftIcon('#E41A1C', 40);        // Merah
-    var iconPuskesmas = createSoftIcon('#377EB8', 26); // Biru
-    var iconUsulan = createSoftIcon('#4DAF4A', 26);    // Hijau
-    var iconRelokasi = createSoftIcon('#FF7F00', 26);  // Oranye
-    var iconLabkesmas = createSoftIcon('#984EA3', 26); // Ungu
+    var iconRS = createSoftIcon('#E41A1C', 40);
+    var iconPuskesmas = createSoftIcon('#377EB8', 26);
+    var iconUsulan = createSoftIcon('#4DAF4A', 26);
+    var iconRelokasi = createSoftIcon('#FF7F00', 26);
+    var iconLabkesmas = createSoftIcon('#984EA3', 26);
 
     var markerMap = {};
     var currentRoutes = [];
@@ -346,19 +431,16 @@
             hash = str.charCodeAt(i) + ((hash << 5) - hash);
         }
         var c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
-        var color = "00000".substring(0, 6 - c.length) + c;
-        return "#" + color;
+        return "#" + "00000".substring(0, 6 - c.length) + c;
     }
 
     fetch('rute_rujukan.geojson')
         .then(response => response.json())
         .then(data => {
             geojsonData = data;
-            console.log("GeoJSON Rute Berhasil Dimuat");
         })
-        .catch(err => console.error("Gagal memuat file rute_rujukan.geojson:", err));
+        .catch(err => console.error("Gagal memuat rute_rujukan.geojson:", err));
 
-    // Data Faskes
     var dataFaskes = [
         { id: "PUSKESMAS_AMARSEKARU", name: "Puskesmas Amarsekaru", shortName: "Amarsekaru", lat: -4.082687, lng: 131.308842, alamat: "Desa Amarsekaru, Kec. Pulau Gorom", type: "puskesmas", jarak: "20 km", waktu: "45 menit", rujukan: "RSUD Goran Riun", ruteName: "Jalur: Pk. Amarsekaru -> RSUD Goran Riun", details: "", labelDir: "left" },
         { id: "PUSKESMAS_KATALOKA", name: "Puskesmas Kataloka", shortName: "Kataloka", lat: -3.987427, lng: 131.377412, alamat: "Desa Kataloka, Kec. Pulau Gorom", type: "puskesmas", jarak: "1 km", waktu: "5 menit", rujukan: "RSUD Goran Riun", ruteName: "Jalur: Pk. Kataloka -> RSUD Goran Riun", details: "", labelDir: "left" },
@@ -405,31 +487,7 @@
     };
 
     var container = document.getElementById('list-container');
-    var allMarkers = [];
 
-    // 2. TOMBOL KONTROL DI PETA (BERSIHKAN RUTE & TOGGLE NAMA NAMA LOKASI)
-    var MapControlGroup = L.Control.extend({
-        options: { position: 'topright' },
-        onAdd: function (map) {
-            var div = L.DomUtil.create('div');
-
-            // Tombol Toggle Nama Lokasi
-            var labelBtn = L.DomUtil.create('button', 'custom-control-btn', div);
-            labelBtn.id = 'toggle-label-btn';
-            labelBtn.innerHTML = '🙈 Sembunyikan Label Nama';
-            labelBtn.onclick = function() { toggleMapLabels(); };
-
-            // Tombol Bersihkan Jalur
-            var clearBtn = L.DomUtil.create('button', 'custom-control-btn', div);
-            clearBtn.innerHTML = '❌ Bersihkan Garis Jalur';
-            clearBtn.onclick = function() { clearAllRoutes(); };
-
-            return div;
-        }
-    });
-    map.addControl(new MapControlGroup());
-
-    // Fungsi Toggle Muncul/Sembunyikan Label Nama Lokasi
     function toggleMapLabels() {
         var mapElement = document.getElementById('map');
         var btn = document.getElementById('toggle-label-btn');
@@ -453,7 +511,7 @@
     window.drawReferralLine = function(puskemasId) {
         clearAllRoutes();
         if(!geojsonData) {
-            alert("Data rute transportasi riil belum selesai dimuat. Silakan coba sesaat lagi.");
+            alert("Data rute belum selesai dimuat. Coba beberapa detik lagi.");
             return;
         }
 
@@ -464,47 +522,30 @@
         
         if(targetFeature) {
             var dynamicColor = getColorFromString(pusk.ruteName);
-
             var geojsonLayer = L.geoJSON(targetFeature, {
-                style: {
-                    color: dynamicColor,
-                    weight: 5,
-                    opacity: 0.95
-                }
+                style: { color: dynamicColor, weight: 5, opacity: 0.95 }
             }).addTo(map);
 
             currentRoutes.push(geojsonLayer);
             map.fitBounds(geojsonLayer.getBounds(), { padding: [80, 80], maxZoom: 12 });
-        } else {
-            console.warn("Jalur tidak ditemukan di file GeoJSON: " + pusk.ruteName);
         }
     };
 
     window.drawAllRsNetwork = function(rsName) {
         clearAllRoutes();
-        if(!geojsonData) {
-            alert("Data rute belum selesai dimuat.");
-            return;
-        }
+        if(!geojsonData) return;
 
         var bounds = L.latLngBounds();
         var hasRoute = false;
-
         var targetPuskesmas = dataFaskes.filter(d => d.rujukan && d.rujukan.toUpperCase() === rsName.toUpperCase());
 
         targetPuskesmas.forEach(function(pusk) {
             if(!pusk.ruteName) return;
-
             var targetFeature = geojsonData.features.find(f => f.properties && f.properties.name === pusk.ruteName);
             if(targetFeature) {
                 var dynamicColor = getColorFromString(pusk.ruteName);
-
                 var geojsonLayer = L.geoJSON(targetFeature, {
-                    style: {
-                        color: dynamicColor,
-                        weight: 4,
-                        opacity: 0.85
-                    }
+                    style: { color: dynamicColor, weight: 4, opacity: 0.85 }
                 }).addTo(map);
 
                 currentRoutes.push(geojsonLayer);
@@ -513,28 +554,11 @@
             }
         });
 
-        var rsPusk = dataFaskes.find(d => d.name.toUpperCase() === rsName.toUpperCase());
-        if(rsPusk && rsPusk.ruteName) {
-            var rsFeature = geojsonData.features.find(f => f.properties && f.properties.name === rsPusk.ruteName);
-            if(rsFeature) {
-                var dynamicColor = getColorFromString(rsPusk.ruteName);
-                var geojsonLayer = L.geoJSON(rsFeature, {
-                    style: { color: dynamicColor, weight: 4.5, opacity: 0.9, dashArray: '5,5' }
-                }).addTo(map);
-                currentRoutes.push(geojsonLayer);
-                bounds.extend(geojsonLayer.getBounds());
-                hasRoute = true;
-            }
-        }
-
-        if(hasRoute) {
-            map.fitBounds(bounds, { padding: [60, 60] });
-        }
+        if(hasRoute) map.fitBounds(bounds, { padding: [60, 60] });
     };
 
     window.toggleAccordion = function(element) {
-        var item = element.parentElement;
-        item.classList.toggle('active');
+        element.parentElement.classList.toggle('active');
     };
 
     Object.keys(groups).forEach(function(type) {
@@ -595,7 +619,6 @@
                 });
 
                 markerMap[item.id] = marker;
-                allMarkers.push(marker);
 
                 var itemDiv = document.createElement('div');
                 itemDiv.className = 'faskes-item';
@@ -637,27 +660,14 @@
             document.getElementById('btn-text').innerText = 'Lihat Daftar Faskes';
         }
 
-        map.flyTo([lat, lng], 14, {
-            animate: true,
-            duration: 1.2
-        });
+        map.flyTo([lat, lng], 14, { animate: true, duration: 1.2 });
 
         setTimeout(function() {
-            if(markerMap[id]) {
-                markerMap[id].openPopup();
-            }
+            if(markerMap[id]) markerMap[id].openPopup();
         }, 400);
     }
 
-    var baseMaps = {
-        "Peta Standar (OSM)": osm,
-        "Satelit (Esri)": satellite
-    };
-    L.control.layers(baseMaps, null, {collapsed: window.innerWidth <= 768}).addTo(map);
-
-    setTimeout(function(){
-        map.invalidateSize();
-    }, 300);
+    setTimeout(function(){ map.invalidateSize(); }, 300);
 </script>
 </body>
 </html>
