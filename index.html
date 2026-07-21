@@ -391,12 +391,32 @@
     ];
 
     var groups = {
-        'rsud': { title: 'Rumah Sakit (RSUD)', color: '#e53e3e', icon: iconRS },
-        'puskesmas': { title: 'Puskesmas Eksisting', color: '#3182ce', icon: iconPuskesmas },
-        'usulan': { title: 'Usulan Faskes Baru', color: '#319795', icon: iconUsulan },
-        'relokasi': { title: 'Usulan Relokasi Puskesmas', color: '#dd6b20', icon: iconRelokasi },
-        'labkesmas': { title: 'Labkesmas Kabupaten', color: '#008080', icon: iconLabkesmas }
-    };
+    'rsud': {
+        title: 'Rumah Sakit (RSUD)',
+        color: '#E53935', // Merah terang
+        icon: iconRS
+    },
+    'puskesmas': {
+        title: 'Puskesmas Eksisting',
+        color: '#1E88E5', // Biru terang
+        icon: iconPuskesmas
+    },
+    'usulan': {
+        title: 'Usulan Faskes Baru',
+        color: '#43A047', // Hijau terang
+        icon: iconUsulan
+    },
+    'relokasi': {
+        title: 'Usulan Relokasi Puskesmas',
+        color: '#FB8C00', // Orange terang
+        icon: iconRelokasi
+    },
+    'labkesmas': {
+        title: 'Labkesmas Kabupaten',
+        color: '#8E24AA', // Ungu terang
+        icon: iconLabkesmas
+    }
+};
 
     var container = document.getElementById('list-container');
     var allMarkers = [];
