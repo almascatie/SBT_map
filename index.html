@@ -168,7 +168,7 @@
             gap: 8px;
         }
 
-        .clear-route-btn {
+        .custom-control-btn {
             background: white;
             padding: 6px 10px;
             border: 2px solid rgba(0,0,0,0.2);
@@ -177,8 +177,12 @@
             font-weight: 500;
             font-size: 12px;
             color: #333;
+            margin-bottom: 5px;
+            display: block;
+            width: 100%;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.15);
         }
-        .clear-route-btn:hover {
+        .custom-control-btn:hover {
             background: #f4f4f4;
         }
 
@@ -231,6 +235,7 @@
             background: #2b5592;
         }
 
+        /* --- STYLING: Label Nama Lokasi Permanen Ringkas & Elegan --- */
         .leaflet-tooltip.custom-map-label {
             background-color: rgba(255, 255, 255, 0.95);
             border: 1.5px solid #333;
@@ -240,6 +245,11 @@
             padding: 2px 6px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.25);
             white-space: nowrap;
+        }
+
+        /* Trik CSS untuk Sembunyikan/Tampilkan Label Peta */
+        .hide-map-labels .leaflet-tooltip.custom-map-label {
+            display: none !important;
         }
 
         @media (max-width: 768px) {
@@ -295,7 +305,7 @@
 
     var map = L.map('map').setView([-3.75, 131.05], 9);
     
-    // PETA STANDAR (OpenStreetMap) DITAMBAHKAN SECARA DEFAULT DI AWAL (.addTo(map))
+    // 1. PETA STANDAR DITAMPILKAN DI AWAL (.addTo(map))
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '© OpenStreetMap'
@@ -318,6 +328,7 @@
         });
     };
 
+    // Warna Icon Sesuai Kelompok
     var iconRS = createSoftIcon('#E41A1C', 40);        // Merah
     var iconPuskesmas = createSoftIcon('#377EB8', 26); // Biru
     var iconUsulan = createSoftIcon('#4DAF4A', 26);    // Hijau
@@ -327,6 +338,7 @@
     var markerMap = {};
     var currentRoutes = [];
     var geojsonData = null;
+    var labelsVisible = true;
 
     function getColorFromString(str) {
         var hash = 0;
@@ -346,6 +358,7 @@
         })
         .catch(err => console.error("Gagal memuat file rute_rujukan.geojson:", err));
 
+    // Data Faskes
     var dataFaskes = [
         { id: "PUSKESMAS_AMARSEKARU", name: "Puskesmas Amarsekaru", shortName: "Amarsekaru", lat: -4.082687, lng: 131.308842, alamat: "Desa Amarsekaru, Kec. Pulau Gorom", type: "puskesmas", jarak: "20 km", waktu: "45 menit", rujukan: "RSUD Goran Riun", ruteName: "Jalur: Pk. Amarsekaru -> RSUD Goran Riun", details: "", labelDir: "left" },
         { id: "PUSKESMAS_KATALOKA", name: "Puskesmas Kataloka", shortName: "Kataloka", lat: -3.987427, lng: 131.377412, alamat: "Desa Kataloka, Kec. Pulau Gorom", type: "puskesmas", jarak: "1 km", waktu: "5 menit", rujukan: "RSUD Goran Riun", ruteName: "Jalur: Pk. Kataloka -> RSUD Goran Riun", details: "", labelDir: "left" },
@@ -394,16 +407,43 @@
     var container = document.getElementById('list-container');
     var allMarkers = [];
 
-    var ClearRouteControl = L.Control.extend({
+    // 2. TOMBOL KONTROL DI PETA (BERSIHKAN RUTE & TOGGLE NAMA NAMA LOKASI)
+    var MapControlGroup = L.Control.extend({
         options: { position: 'topright' },
         onAdd: function (map) {
-            var btn = L.DomUtil.create('button', 'clear-route-btn');
-            btn.innerHTML = '❌ Bersihkan Garis Jalur';
-            btn.onclick = function() { clearAllRoutes(); };
-            return btn;
+            var div = L.DomUtil.create('div');
+
+            // Tombol Toggle Nama Lokasi
+            var labelBtn = L.DomUtil.create('button', 'custom-control-btn', div);
+            labelBtn.id = 'toggle-label-btn';
+            labelBtn.innerHTML = '🙈 Sembunyikan Label Nama';
+            labelBtn.onclick = function() { toggleMapLabels(); };
+
+            // Tombol Bersihkan Jalur
+            var clearBtn = L.DomUtil.create('button', 'custom-control-btn', div);
+            clearBtn.innerHTML = '❌ Bersihkan Garis Jalur';
+            clearBtn.onclick = function() { clearAllRoutes(); };
+
+            return div;
         }
     });
-    map.addControl(new ClearRouteControl());
+    map.addControl(new MapControlGroup());
+
+    // Fungsi Toggle Muncul/Sembunyikan Label Nama Lokasi
+    function toggleMapLabels() {
+        var mapElement = document.getElementById('map');
+        var btn = document.getElementById('toggle-label-btn');
+
+        if (labelsVisible) {
+            mapElement.classList.add('hide-map-labels');
+            btn.innerHTML = '👁️ Tampilkan Label Nama';
+            labelsVisible = false;
+        } else {
+            mapElement.classList.remove('hide-map-labels');
+            btn.innerHTML = '🙈 Sembunyikan Label Nama';
+            labelsVisible = true;
+        }
+    }
 
     function clearAllRoutes() {
         currentRoutes.forEach(function(r) { map.removeLayer(r); });
